@@ -329,17 +329,10 @@ def algo_manage_dependencies(df: pd.DataFrame, card_id: str, dependency: str, pr
 ## Multiprocessing
 ```
 from multiprocessing import Process, Queue, current_process
-import queue
-import pyodbc
-import pandas as pd
-import os
-from datetime import datetime
-import numpy as np
-import config.definitions as cg
-time = str(datetime.now().strftime("%d-%m-%Y"))
-
+# Code omitted for brevity
 
 def queue_writer(sql_query: str, database: str, message_queue: Queue) -> None:
+    "Read dataframe from database and put in message queue."
     name = current_process().name
     print("[PREPROCESSING] {} started".format(name))
     try:
@@ -354,8 +347,8 @@ def queue_writer(sql_query: str, database: str, message_queue: Queue) -> None:
             pyodbc_driver, pyodbc_server, pyodbc_database))
 
         df = pd.read_sql(sql, conn)
-
         message_queue.put(df)
+
         print("[PREPROCESSING] {} ended: Success".format(name))
     except Exception as e:
         print("[PREPROCESSING] {} ended: Failure.\n[Error] \t{}.\n[Drivers] \t{}\n".format(
@@ -363,6 +356,8 @@ def queue_writer(sql_query: str, database: str, message_queue: Queue) -> None:
 
 
 def get_data() -> pd.DataFrame:
+    """Loop through list containing SQL queries and database names,
+    Submit queries to database and process dataframes."""
     os.chdir('.\\db')
 
     message_queue = Queue()
@@ -395,6 +390,7 @@ def get_data() -> pd.DataFrame:
     for p in child_processes:
         p.join()
 
+    # Now join with master file
     with open(cg.Globals.sql_query_population, 'r', encoding="utf-8") as sql_script:
         sql = sql_script.read()
 
