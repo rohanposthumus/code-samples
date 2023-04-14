@@ -165,3 +165,110 @@ GROUP BY lci.item_type,
     lcia.duration_sum,
     lcia.interaction_cnt
 ```
+## Use a dataframe to send emails using HTML templates
+```
+import pandas as pd
+import os
+from datetime import datetime
+import win32com.client as win32
+from jinja2 import Template
+import letters.py_2023.template_bfn as template1
+import letters.py_2023.template_qq as template2
+
+outlook = win32.Dispatch('outlook.application')
+
+def run(df_email_preprocess: pd.DataFrame, mode: str = "display"):
+    "Use a dataframe to send emails using HTML templates."
+    try:
+        start_time = datetime.now()
+
+        # Confirm with user before sending thousands of emails
+        print("Do you want to run the script? (y/n)")
+        x = input()
+
+        if x != "y":
+            print("Aborting email bot")
+            raise SystemExit
+
+        # If the mode is incorrect, exit
+        if mode != "display" and mode != "send":
+            print("Aborting email bot")
+            raise SystemExit
+
+        # Get the files for attachments
+        start_dir = os.getcwd()
+
+        data1 = df_email_preprocess
+        data1 = data1.drop_duplicates(subset=["student_number"])
+
+        # Get the images for attachments
+        attachment_path = start_dir + '\\letters\\py_2023'
+
+        attachment1_source = os.path.join(
+            attachment_path, "Top_anonymized.png")
+        attachment2_source = os.path.join(
+            attachment_path, "Bottom_anonymized.png")
+        property_accessor = r"http://schemas.microsoft.com/mapi/proptag/0x3712001F"
+
+        print('[STATUS] Looping through email numbers')
+        for dec, num, nam, ema in zip(data1["decision"], data1["student_number"], data1["first_name"], data1["email"]):
+            # Switch email accounts based on decision and use different template each time
+            if dec == "anonymized1":
+                mail = outlook.CreateItem(0)
+                mail.SentOnBehalfOfName = "anonymized1@anonymized.com"
+                mail.To = str(ema)
+                mail.Subject = '{}: anonymized message'.format(
+                    num)
+                attachment1 = mail.Attachments.Add(attachment1_source)
+                attachment1.PropertyAccessor.SetProperty(
+                    property_accessor, "Attachment-Header")
+                attachment2 = mail.Attachments.Add(attachment2_source)
+                attachment2.PropertyAccessor.SetProperty(
+                    property_accessor, "Attachment-Footer")
+                mail.HTMLBody = template1.bfn.render(
+                    student_name=nam, student_number=num)
+                if mode == "display":
+                    mail.display()  # This only writes the email but does not send it
+                elif mode == "send":
+                    mail.Send()     # Send email i.e. live
+                print("Template1 email send to {}: {}".format(nam, num))
+
+            # Code omitted for brevity
+
+            elif dec == "anonymized2":
+                mail = outlook.CreateItem(0)
+                mail.SentOnBehalfOfName = "anonymized2@anonymized.com"
+                mail.To = str(ema)
+                mail.Subject = '{}: anonymized message'.format(
+                    num)
+                attachment1 = mail.Attachments.Add(attachment1_source)
+                attachment1.PropertyAccessor.SetProperty(
+                    property_accessor, "Attachment-Header")
+                attachment2 = mail.Attachments.Add(attachment2_source)
+                attachment2.PropertyAccessor.SetProperty(
+                    property_accessor, "Attachment-Footer")
+                mail.HTMLBody = template8.wrote_proficient_qq.render(
+                    student_name=nam, student_number=num)
+                if mode == "display":
+                    mail.display()
+                elif mode == "send":
+                    mail.Send()    
+                print("Template2 email send to {}: {}".format(nam, num))
+
+            # Code omitted for brevity
+            
+            else:
+                print("No match {}: {}".format(nam, num))
+
+        finish_time = (datetime.now() - start_time).total_seconds()
+        if finish_time < 60:
+            print("[STOP] Script finished", round(
+                finish_time), "seconds later")
+        else:
+            print("[STOP] Script finished", round(
+                finish_time/60), "minutes later")
+    except Exception as e:
+        print(e)
+
+
+```
