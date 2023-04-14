@@ -34,12 +34,12 @@ def predict_out_sample():
     start_time = datetime.now()
     current_time = start_time.strftime("%H:%M")
 
-    print("[PREDICT-OUT] calling predict_in_sample() at " + current_time)
+    print("[PREDICT-OUT] Calling predict_out_sample() at " + current_time)
 
     train_dir = r"C:\anonymized\train-data"
     new_dir = r"C:\anonymized\new-data"
-    training_file = "Training plus dummies.csv"
-    prediction_file = "No results.csv"
+    training_file = "training plus dummies.csv"
+    prediction_file = "no results.csv"
     updating_file = "prediction results master list.csv"
     student_number_str = "student_number"
     predict_variable = "score_category"
@@ -70,8 +70,7 @@ def predict_out_sample():
     prediction_data.drop([student_number_str,
                           'score',  
                           'campus',
-                          'faculty'],
-                         axis=1, inplace=True)
+                          'faculty'], axis=1, inplace=True)
 
     prediction_data[predict_variable] = "no_results_yet"
 
