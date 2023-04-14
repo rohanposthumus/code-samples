@@ -20,7 +20,7 @@ def download_students() -> pd.DataFrame:
     return df
 ```
 
-## Out of sample prediction with Scikit-Learn
+## Machine learning prediction with Scikit-Learn
 ```
 import pandas as pd
 import os
@@ -262,6 +262,66 @@ def run(df_email_preprocess: pd.DataFrame, mode: str = "display"):
 
     except Exception as e:
         print(e)
+```
 
+## Dataframes and recursion
+```
+# Code omitted for brevity
+sys.setrecursionlimit(1000)
+
+def algo_manage_dependencies(df: pd.DataFrame, card_id: str, dependency: str, priority_number: str, row: int = 0, viewed_cards=[], count=0) -> pd.DataFrame:
+    "This function makes sure that the order of dependencies does not clash."
+
+    try:
+        df.sort_values(by=[priority_number],
+                       inplace=True,
+                       ascending=[True])
+        viewed_cards = []
+        score_list = []
+
+        for w, d in zip(df[card_id], df[dependency]):
+            try:
+                if d == '0':
+                    score_list.append(1)
+                    viewed_cards.append(w)
+
+                elif d in viewed_cards:
+                    score_list.append(1)
+                    viewed_cards.append(w)
+                else:
+                    score_list.append(0)
+                    viewed_cards.append(w)
+            except:
+                score_list.append(0)
+                viewed_cards.append(w)
+
+        df['score'] = score_list
+        sum_of_deps = df['score'].sum(axis=0)
+        n = len(df)
+        j = row
+        k = j + 1
+
+        if sum_of_deps != n and j < n and k < n:
+            # print(viewed_cards)
+            if df['score'].iloc[j] == 0:
+                df[priority_number].iloc[j] = df[priority_number].iloc[j] + 2
+                count += 1
+                viewed_cards = viewed_cards.remove(df[card_id].iloc[j])
+                return algo_manage_dependencies(df, 'card_id', 'card_dependency', 'priority_number', j, viewed_cards, count)
+            elif df['score'].iloc[j] == 1:
+                count += 1
+                return algo_manage_dependencies(df, 'card_id', 'card_dependency', 'priority_number', k, viewed_cards, count)
+            else:
+                pass
+
+        return df
+    except RecursionError as re:
+        # Code omitted for brevity
+        return df
+
+    except Exception as e:
+        # Code omitted for brevity
+        df = pd.DataFrame()
+        return df
 
 ```
