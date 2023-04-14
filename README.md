@@ -130,3 +130,38 @@ def predict_out_sample():
         print("[PREDICT-OUT] predict_out_sample() finished",
               round(finish_time/60), "minutes later")
 ```
+## Simple SQL query
+```
+DECLARE @StartDate AS VARCHAR(100) = '2022-07-01';
+
+SELECT json_value(lp.stage, '$.user_id') AS StudentNumber,
+    lt.name AS ToolName,
+    lci.name AS CourseItemName,
+    lci.item_type AS ItemType,
+    lc.name AS CourseName,
+    lc.course_number AS CourseNumber,
+    COUNT(DISTINCT lcia.person_id) AS DistinctItemUsers,
+    lcia.duration_sum / 60 AS DurationMinutes,
+    lcia.interaction_cnt AS CourseItemClicks,
+    convert(VARCHAR, lcia.first_accessed_time, 103) AS 'Date'
+FROM stg_lms.cdm_lms.course AS lc
+LEFT JOIN stg_lms.cdm_lms.course_item AS lci ON lc.id = lci.course_id
+LEFT JOIN stg_lms.cdm_lms.course_tool AS lct ON lci.course_tool_id = lct.id
+LEFT JOIN stg_lms.cdm_lms.tool AS lt ON lt.id = lct.tool_id
+LEFT JOIN stg_lms.cdm_lms.course_item_activity AS lcia ON lcia.course_item_id = lci.id
+LEFT JOIN stg_lms.cdm_lms.person_course AS lpc ON lpc.id = lcia.person_course_id
+LEFT JOIN stg_lms.cdm_lms.person AS lp ON lpc.person_id = lp.id
+WHERE lpc.course_role = 'S'
+    AND lc.course_number IN ('anonymized')
+    AND lcia.first_accessed_time >= @StartDate
+GROUP BY lci.item_type,
+    lt.tool_type,
+    lt.name,
+    lci.name,
+    lc.name,
+    lc.course_number,
+    lcia.first_accessed_time,
+    json_value(lp.stage, '$.user_id'),
+    lcia.duration_sum,
+    lcia.interaction_cnt
+```
