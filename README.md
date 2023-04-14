@@ -66,7 +66,8 @@ def predict_out_sample():
     prediction_data = training_columns.append(prediction_data)
     prediction_data = prediction_data.fillna(0)
 
-    student_numbers = prediction_data[student_number_str].copy() # Use later
+    # Will use student numbers later
+    student_numbers = prediction_data[student_number_str].copy() 
     prediction_data.drop([student_number_str,
                           'score',  
                           'campus',
@@ -121,13 +122,11 @@ def predict_out_sample():
     refresh_updated_data.to_csv(
         "prediction results master list.csv", index=False)
 
-    print("[PREDICT-OUT] calling predict() at " + current_time)
-
     finish_time = (datetime.now() - start_time).total_seconds()
     if finish_time < 60:
-        print("[PREDICT-OUT] predict() finished",
+        print("[PREDICT-OUT] predict_out_sample() finished",
               round(finish_time), "seconds later")
     else:
-        print("[PREDICT-OUT] predict() finished",
+        print("[PREDICT-OUT] predict_out_sample() finished",
               round(finish_time/60), "minutes later")
 ```
