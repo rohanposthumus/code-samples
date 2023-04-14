@@ -1,6 +1,6 @@
 # Code samples
 
-Due to the proprietary nature of the algorithms and software I developed, the Github repositories where they are stored are protected by non-disclosure contracts and are therefore private. However, I have created a separate Github repository specifically for code snippets that I am authorized to share.
+Due to the proprietary nature of the algorithms and software I develop, the Github repositories where they are stored are protected by non-disclosure contracts and are therefore private. However, I have created a separate Github repository specifically for code snippets that I am authorized to share or are part of my hobby projects.
 
 ## Use Python to submit a SQL query to a database
 ```
