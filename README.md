@@ -22,6 +22,13 @@ def download_students() -> pd.DataFrame:
 
 ## Out of sample prediction with Scikit-Learn
 ```
+import pandas as pd
+import os
+from datetime import datetime
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import GradientBoostingClassifier
+from datetime import datetime
+
 def predict_out_sample():
     "Predicts out of sample values using training data"
     start_time = datetime.now()
