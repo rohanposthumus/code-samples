@@ -2,7 +2,7 @@
 
 Due to the proprietary nature of the algorithms and software I develop, the Github repositories where they are stored are protected by non-disclosure contracts and are therefore private. However, I have created a separate Github repository specifically for code snippets that I am authorized to share or are part of my hobby projects.
 
-## Use Python to submit a SQL query to a database
+## Use Python to submit a SQL query to a database:
 ```
 def download_students() -> pd.DataFrame:
     "Pull student data from server to compare with enrollments"
@@ -20,7 +20,7 @@ def download_students() -> pd.DataFrame:
     return df
 ```
 
-## Machine learning prediction with Scikit-Learn
+## Machine learning prediction with Scikit-Learn:
 ```
 import pandas as pd
 import os
@@ -130,7 +130,7 @@ def predict_out_sample():
         print("[PREDICT-OUT] predict_out_sample() finished",
               round(finish_time/60), "minutes later")
 ```
-## Simple SQL query
+## Simple SQL query:
 ```
 DECLARE @StartDate AS VARCHAR(100) = '2022-07-01';
 
@@ -165,11 +165,10 @@ GROUP BY lci.item_type,
     lcia.duration_sum,
     lcia.interaction_cnt
 ```
-## Use a dataframe to send emails using HTML templates
+## Use a dataframe to send emails (HTML templates) and switch between email accounts based on decision:
 ```
+# Code omitted for brevity
 import pandas as pd
-import os
-from datetime import datetime
 import win32com.client as win32
 from jinja2 import Template
 import letters.py_2023.template_bf as template1
@@ -264,12 +263,13 @@ def run(df_email_preprocess: pd.DataFrame, mode: str = "display"):
         print(e)
 ```
 
-## Dataframes and recursion
+## Use recursion to process a dataframe:
 ```
 # Code omitted for brevity
 sys.setrecursionlimit(1000)
 
-def algo_manage_dependencies(df: pd.DataFrame, card_id: str, dependency: str, priority_number: str, row: int = 0, viewed_cards=[], count=0) -> pd.DataFrame:
+def algo_manage_dependencies(df: pd.DataFrame, card_id: str, dependency: str, priority_number: str, 
+    row: int = 0, viewed_cards=[], count=0) -> pd.DataFrame:
     "This function makes sure that the order of dependencies does not clash."
 
     try:
@@ -326,7 +326,7 @@ def algo_manage_dependencies(df: pd.DataFrame, card_id: str, dependency: str, pr
 
 ```
 
-## Multiprocessing
+## Multiprocessing: submit queries to database and process dataframes using a message queue:
 ```
 from multiprocessing import Process, Queue, current_process
 # Code omitted for brevity
