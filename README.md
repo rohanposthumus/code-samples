@@ -325,3 +325,96 @@ def algo_manage_dependencies(df: pd.DataFrame, card_id: str, dependency: str, pr
         return df
 
 ```
+
+## Multiprocessing
+```
+from multiprocessing import Process, Queue, current_process
+import queue
+import pyodbc
+import pandas as pd
+import os
+from datetime import datetime
+import numpy as np
+import config.definitions as cg
+time = str(datetime.now().strftime("%d-%m-%Y"))
+
+
+def queue_writer(sql_query: str, database: str, message_queue: Queue) -> None:
+    name = current_process().name
+    print("[PREPROCESSING] {} started".format(name))
+    try:
+        with open(sql_query, 'r', encoding="utf-8") as sql_script:
+            sql = sql_script.read()
+
+        pyodbc_driver = "DRIVER={SQL Server};"
+        pyodbc_server = "SERVER=anonymized;"
+        pyodbc_database = "DATABASE={};".format(database) # Pass database string dynamically
+
+        conn = pyodbc.connect("{}{}{}".format(
+            pyodbc_driver, pyodbc_server, pyodbc_database))
+
+        df = pd.read_sql(sql, conn)
+
+        message_queue.put(df)
+        print("[PREPROCESSING] {} ended: Success".format(name))
+    except Exception as e:
+        print("[PREPROCESSING] {} ended: Failure.\n[Error] \t{}.\n[Drivers] \t{}\n".format(
+            name, e, pyodbc.drivers()))
+
+
+def get_data() -> pd.DataFrame:
+    os.chdir('.\\db')
+
+    message_queue = Queue()
+
+    child_processes = []
+    for i in range(len(cg.Globals.data)):
+        p = Process(target=queue_writer, args=[
+                    cg.Globals.data[i][0], cg.Globals.data[i][1], message_queue])
+        p.start()
+        child_processes.append(p)
+
+    queue_results = []
+    while True:
+        try:
+            r = message_queue.get(block=False, timeout=0.01)
+            queue_results.append(r)
+        except queue.Empty:
+            pass
+        all_exited = True
+        for t in child_processes:
+            try:
+                if t.exitcode is None:
+                    all_exited = False
+                    break
+            except:
+                pass
+        if all_exited & message_queue.empty():
+            break
+
+    for p in child_processes:
+        p.join()
+
+    with open(cg.Globals.sql_query_population, 'r', encoding="utf-8") as sql_script:
+        sql = sql_script.read()
+
+    pyodbc_driver = "DRIVER={SQL Server};"
+    pyodbc_server = "SERVER=anonymized;"
+    pyodbc_database = "DATABASE={};".format(cg.Globals.database_sis)
+
+    conn = pyodbc.connect("{}{}{}".format(
+        pyodbc_driver, pyodbc_server, pyodbc_database))
+
+    master_df = pd.read_sql(sql, conn)
+
+    # Left join
+    for frames in queue_results:
+        master_df = master_df.merge(frames,
+                                    on='StudentNumber',
+                                    how='left')
+
+    master_df.to_excel("Data extraction ran on {}.xlsx".format(
+        time), sheet_name='Sheet1', index=False)
+    return master_df
+
+```
