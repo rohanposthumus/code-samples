@@ -172,7 +172,7 @@ import os
 from datetime import datetime
 import win32com.client as win32
 from jinja2 import Template
-import letters.py_2023.template_bfn as template1
+import letters.py_2023.template_bf as template1
 import letters.py_2023.template_qq as template2
 
 outlook = win32.Dispatch('outlook.application')
@@ -225,12 +225,12 @@ def run(df_email_preprocess: pd.DataFrame, mode: str = "display"):
                 attachment2 = mail.Attachments.Add(attachment2_source)
                 attachment2.PropertyAccessor.SetProperty(
                     property_accessor, "Attachment-Footer")
-                mail.HTMLBody = template1.bfn.render(
+                mail.HTMLBody = template1.bf.render(
                     student_name=nam, student_number=num)
                 if mode == "display":
                     mail.display()  # This only writes the email but does not send it
                 elif mode == "send":
-                    mail.Send()     # Send email i.e. live
+                    mail.Send()     # Send emails i.e. live
                 print("Template1 email send to {}: {}".format(nam, num))
 
             # Code omitted for brevity
@@ -247,7 +247,7 @@ def run(df_email_preprocess: pd.DataFrame, mode: str = "display"):
                 attachment2 = mail.Attachments.Add(attachment2_source)
                 attachment2.PropertyAccessor.SetProperty(
                     property_accessor, "Attachment-Footer")
-                mail.HTMLBody = template8.wrote_proficient_qq.render(
+                mail.HTMLBody = template2.qq.render(
                     student_name=nam, student_number=num)
                 if mode == "display":
                     mail.display()
@@ -256,17 +256,10 @@ def run(df_email_preprocess: pd.DataFrame, mode: str = "display"):
                 print("Template2 email send to {}: {}".format(nam, num))
 
             # Code omitted for brevity
-            
+
             else:
                 print("No match {}: {}".format(nam, num))
 
-        finish_time = (datetime.now() - start_time).total_seconds()
-        if finish_time < 60:
-            print("[STOP] Script finished", round(
-                finish_time), "seconds later")
-        else:
-            print("[STOP] Script finished", round(
-                finish_time/60), "minutes later")
     except Exception as e:
         print(e)
 
